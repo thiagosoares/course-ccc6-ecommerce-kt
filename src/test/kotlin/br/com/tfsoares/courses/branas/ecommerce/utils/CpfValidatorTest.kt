@@ -1,34 +1,16 @@
 package br.com.tfsoares.courses.branas.ecommerce.utils
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-
-
 import org.junit.jupiter.api.Test
 
 class CpfValidatorTest {
 
-    @BeforeEach
-    fun setUp() {
+    private fun expectTrue(cpf: String) {
+        assertThat(CpfValidator().validate(cpf)).isTrue
     }
 
-    @AfterEach
-    fun tearDown() {
-    }
-
-
-    @Test
-    fun `GIVEN , WHEN , THEN `() {
-        assertThat("1").isEqualTo("1")
-    }
-
-    fun expectTrue(cpf: String) {
-        assertThat(CpfValidator.validate(cpf)).isTrue
-    }
-
-    fun expectFalse(cpf: String) {
-        assertThat(CpfValidator.validate(cpf)).isFalse
+    private fun expectFalse(cpf: String) {
+        assertThat(CpfValidator().validate(cpf)).isFalse
     }
 
     @Test
@@ -102,6 +84,4 @@ class CpfValidatorTest {
     fun `GIVE a invalid CPF with letters on check digits, WHEN validate, THEN assert false`() {
         expectFalse("115.906.360.000-XY")
     }
-
-
 }

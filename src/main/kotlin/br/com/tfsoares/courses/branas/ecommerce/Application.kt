@@ -4,8 +4,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class ECommerceKotlinApplication
+class Application
 
 fun main(args: Array<String>) {
-	runApplication<ECommerceKotlinApplication>(*args)
+    runApplication<Application>(*args)
 }
