@@ -1,4 +1,4 @@
-package br.com.tfsoares.courses.branas.ecommerce.utils
+package br.com.tfsoares.courses.branas.ecommerce.domain
 import br.com.tfsoares.courses.branas.ecommerce.errors.InvalidCpfException
 
 class Cpf(val cpf: String) {
