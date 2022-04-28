@@ -1,26 +1,28 @@
 package br.com.tfsoares.courses.branas.ecommerce.utils
 import br.com.tfsoares.courses.branas.ecommerce.errors.InvalidCpfException
 
-class CpfValidator {
+class Cpf(val cpf: String) {
 
     companion object {
         private const val CPF_LENGTH = 11
         private const val CPF_BODY_LENGTH = 9
     }
 
-    fun validate(cpf: String): Boolean {
-        return try {
-            val digits = splitCpfDigits(cpf)
-            validateFormat(digits)
-            val bodyDigits = getBodyDigits(digits)
-            val firstCheckDigit = getCheckDigit(bodyDigits)
-            val secondCheckDigit = getCheckDigit(bodyDigits + firstCheckDigit)
-            val originalCheckDigit = getOriginalCheckDigits(digits)
+    init {
+        isValid(cpf)
+    }
 
-            originalCheckDigit == "$firstCheckDigit$secondCheckDigit"
-        } catch (e: InvalidCpfException) {
-            false
-        }
+    private fun isValid(cpf: String) {
+
+        val digits = splitCpfDigits(cpf)
+        validateFormat(digits)
+        val bodyDigits = getBodyDigits(digits)
+        val firstCheckDigit = getCheckDigit(bodyDigits)
+        val secondCheckDigit = getCheckDigit(bodyDigits + firstCheckDigit)
+        val originalCheckDigit = getOriginalCheckDigits(digits)
+        val isInvalid = originalCheckDigit != "$firstCheckDigit$secondCheckDigit"
+
+        if (isInvalid) throw InvalidCpfException("Invalid CPF")
     }
 
     private fun splitCpfDigits(cpf: String) = unmaskCpf(cpf).chunked(1)

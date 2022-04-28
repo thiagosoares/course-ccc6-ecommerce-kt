@@ -1,43 +1,48 @@
 package br.com.tfsoares.courses.branas.ecommerce.utils
 
+import br.com.tfsoares.courses.branas.ecommerce.errors.InvalidCpfException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
-class CpfValidatorTest {
+class CpfTest {
 
-    private fun expectTrue(cpf: String) {
-        assertThat(CpfValidator().validate(cpf)).isTrue
+    private fun expectValid(cpf: String) {
+        assertThat(Cpf(cpf).cpf).isEqualTo(cpf)
     }
 
-    private fun expectFalse(cpf: String) {
-        assertThat(CpfValidator().validate(cpf)).isFalse
+    private fun expectFalse(cpf: String, message: String = "Invalid CPF") {
+        val error = assertThrows<InvalidCpfException> {
+            Cpf(cpf)
+        }
+        assertThat(error.message).isEqualTo(message)
     }
 
     @Test
     fun `GIVEN a valid CPF with mask, WHEN validate, THEN assert true`() {
-        expectTrue("115.906.360-58")
+        expectValid("115.906.360-58")
     }
 
     @Test
     fun `GIVEN a valid CPF with no mask, WHEN validate, THEN assert true`() {
-        expectTrue("11590636058")
+        expectValid("11590636058")
     }
 
     @Test
     fun `GIVEN a valid CPF with first verifier equals 2, WHEN validate, THEN assert true`() {
-        expectTrue("252.002.360-02")
+        expectValid("252.002.360-02")
     }
 
     @Test
     fun `GIVEN a valid CPF with first verifier less than 2, WHEN validate, THEN assert true`() {
-        expectTrue("862.869.870-10")
+        expectValid("862.869.870-10")
     }
 
     // Errors
 
     @Test
     fun `GIVEN a blank CPF, WHEN validate, THEN assert false`() {
-        expectFalse("")
+        expectFalse("", "Invalid CPF size")
     }
 
     @Test
@@ -57,31 +62,31 @@ class CpfValidatorTest {
 
     @Test
     fun `GIVEN a CPF with size less than 11, WHEN validate, THEN assert false`() {
-        expectFalse("1159063600")
+        expectFalse("1159063600", "Invalid CPF size")
     }
 
     @Test
     fun `GIVEN a CPF with size EQUALS 13, WHEN validate, THEN assert false`() {
-        expectFalse("1150906.3600-00")
+        expectFalse("1150906.3600-00", "Invalid CPF size")
     }
 
     @Test
     fun `GIVEN a CPF with size more than 14, WHEN validate, THEN assert false`() {
-        expectFalse("115.906.360.000-00")
+        expectFalse("115.906.360.000-00", "Invalid CPF size")
     }
 
     @Test
     fun `GIVE a All 1 CPF, WHEN validate, THEN assert false`() {
-        expectFalse("11111111111")
+        expectFalse("11111111111", "Invalid CPF pattern")
     }
 
     @Test
     fun `GIVE a invalid CPF with letters, WHEN validate, THEN assert false`() {
-        expectFalse("111.111.11X-11")
+        expectFalse("111.111.11X-11", "Invalid CPF size")
     }
 
     @Test
     fun `GIVE a invalid CPF with letters on check digits, WHEN validate, THEN assert false`() {
-        expectFalse("115.906.360.000-XY")
+        expectFalse("115.906.360.000-XY", "Invalid CPF size")
     }
 }
