@@ -1,7 +1,7 @@
 package br.com.tfsoares.courses.branas.ecommerce.domain
 import br.com.tfsoares.courses.branas.ecommerce.errors.InvalidCpfException
 
-class Cpf(val cpf: String) {
+data class Cpf(val cpf: String) {
 
     companion object {
         private const val CPF_LENGTH = 11
