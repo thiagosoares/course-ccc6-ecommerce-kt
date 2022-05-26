@@ -1,9 +1,14 @@
-package br.com.tfsoares.courses.branas.ecommerce.domain
+package br.com.tfsoares.courses.branas.ecommerce.domain.entity
 
 import br.com.tfsoares.courses.branas.ecommerce.errors.InvalidCouponException
 import java.text.DecimalFormat
+import java.time.LocalDateTime
 
-data class Coupon(private val code: String, private val percentage: Int) {
+data class Coupon(
+    val code: String,
+    private val percentage: Int,
+    private val expireDate: LocalDateTime = LocalDateTime.now()
+) {
 
     companion object {
         private val FORMATTER = DecimalFormat("#.##")
@@ -22,7 +27,11 @@ data class Coupon(private val code: String, private val percentage: Int) {
         if (percentage < 0) throw InvalidCouponException(ERROR_INVALID_COUPON)
     }
 
-    fun applyDiscount(value: Float): Float {
-        return FORMATTER.format(value * ((100 - percentage).toFloat().div(100))).toFloat()
+    fun applyDiscount(value: Double): Double {
+        return FORMATTER.format(value * ((100 - percentage).toFloat().div(100))).toDouble()
+    }
+
+    fun isExpired(date: LocalDateTime): Boolean {
+        return expireDate.isBefore(date)
     }
 }

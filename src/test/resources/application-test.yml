@@ -1,0 +1,26 @@
+#server:
+#  friendlyName: Test Server
+
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:12:///test_database
+#    url: jdbc:tc:postgresql:14.2:///ecommerce?TC_TMPFS=/testtmpfs:rw
+    username: user
+    password: password
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+  jpa:
+    hibernate.ddl-auto: none
+    properties.hibernate.default-schema: public
+    test:
+      database:
+        replace: none
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    liquibase: INFO

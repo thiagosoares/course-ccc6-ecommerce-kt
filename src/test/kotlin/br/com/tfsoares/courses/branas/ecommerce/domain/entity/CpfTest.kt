@@ -1,4 +1,4 @@
-package br.com.tfsoares.courses.branas.ecommerce.domain
+package br.com.tfsoares.courses.branas.ecommerce.domain.entity
 
 import br.com.tfsoares.courses.branas.ecommerce.errors.InvalidCpfException
 import org.assertj.core.api.Assertions.assertThat

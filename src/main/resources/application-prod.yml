@@ -1,0 +1,37 @@
+server:
+  port: 9080
+  shutdown: graceful # see https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-graceful-shutdown
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json,image/svg+xml
+    min-response-size: 1024
+
+
+spring:
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://localhost:5432/ecommerce
+    username: ecommerce
+    password:
+    hikari:
+      poolName: Hikari
+      auto-commit: false
+    jpa:
+      database-platform: tech.jhipster.domain.util.FixedPostgreSQL10Dialect
+
+logging:
+  level:
+    ROOT: INFO
+    tech.jhipster: INFO
+    com.mycompany.myapp: INFO
+
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: false

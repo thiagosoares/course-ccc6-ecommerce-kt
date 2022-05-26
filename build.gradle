@@ -26,9 +26,12 @@ plugins {
 	id "com.github.andygoossens.gradle-modernizer-plugin"
 }
 
+ext {
+	set('testcontainersVersion', "1.15.3")
+}
+
 group = "br.com.tfsoares.courses.branas"
 version = "0.0.1-SNAPSHOT"
-
 description = ""
 
 sourceCompatibility=11
@@ -39,14 +42,11 @@ apply from: "gradle/docker.gradle"
 apply from: "gradle/sonar.gradle"
 apply from: 'gradle/kotlin.gradle'
 
-if (project.hasProperty("zipkin")) {
-	apply from: "gradle/zipkin.gradle"
-}
 
-idea {
-	module {
-		excludeDirs += files("node_modules")
-	}
+if (project.hasProperty("prod")) {
+	apply from: "gradle/profile_prod.gradle"
+} else {
+	apply from: "gradle/profile_dev.gradle"
 }
 
 eclipse {
@@ -62,7 +62,7 @@ eclipse {
 defaultTasks "bootRun"
 
 springBoot {
-	mainClass = "com.mycompany.myapp.ExampleRedisApp"
+	mainClass = "br.com.tfsoares.courses.branas.ecommerce.Application"
 }
 
 test {
@@ -75,11 +75,6 @@ test {
 	reports {
 		html.enabled = true
 	}
-}
-
-modernizer {
-	failOnViolations = true
-	includeTestClasses = true
 }
 
 task integrationTest(type: Test) {
@@ -96,9 +91,10 @@ task integrationTest(type: Test) {
 		environment 'spring.profiles.active', 'testcontainers'
 	}
 	reports {
-		html.enabled = false
+		html.enabled = true
 	}
 }
+check.dependsOn integrationTest
 
 task consoleLauncherTest(type: JavaExec) {
 	dependsOn(testClasses)
@@ -120,10 +116,17 @@ task cucumberTest(type: Test) {
 		html.enabled = true
 	}
 }
-
 check.dependsOn cucumberTest
 
-check.dependsOn integrationTest
+jacocoTestReport {
+	reports {
+		xml.required = false
+		csv.required = false
+		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+	}
+}
+check.dependsOn jacocoTestReport
+
 task testReport(type: TestReport) {
 	destinationDir = file("$buildDir/reports/tests")
 	reportOn test
@@ -143,6 +146,11 @@ if (!project.hasProperty("runList")) {
 	project.ext.runList = "main"
 }
 
+modernizer {
+	failOnViolations = true
+	includeTestClasses = true
+}
+
 gitProperties {
 	failOnNoGitDirectory = false
 	keys = ["git.branch", "git.commit.id.abbrev", "git.commit.id.describe"]
@@ -153,20 +161,9 @@ checkstyle {
 	configFile file("checkstyle.xml")
 	checkstyleTest.enabled = false
 }
+
 nohttp {
 	source.include "build.gradle", "README.md"
-}
-
-configurations {
-	providedRuntime
-	implementation.exclude module: "spring-boot-starter-tomcat"
-	all {
-		resolutionStrategy {
-			// Inherited version from Spring Boot can't be used because of regressions:
-			// To be removed as soon as spring-boot use the same version
-//			force 'org.liquibase:liquibase-core:4.6.1'
-		}
-	}
 }
 
 repositories {
@@ -196,21 +193,22 @@ dependencies {
 	implementation "org.apache.commons:commons-lang3"
 	implementation "io.github.microutils:kotlin-logging:2.1.21"
 
-	implementation "org.springframework.boot:spring-boot-starter-data-mongodb-reactive"
-	implementation "io.mongock:mongock-springboot"
-	implementation "io.mongock:mongodb-springdata-v3-driver"
-	implementation "org.springframework.boot:spring-boot-starter-data-mongodb"
-	// Mongo db driver was excluded from starter, adding manually
-	implementation "org.mongodb:mongodb-driver-reactivestreams"
-	// Mongo db driver was excluded from starter, adding manually
-	implementation "org.mongodb:mongodb-driver-sync"
+	implementation "javax.cache:cache-api"
+	implementation "org.hibernate:hibernate-core"
+	implementation "com.zaxxer:HikariCP"
+	implementation "javax.transaction:javax.transaction-api"
+	implementation "org.ehcache:ehcache"
+	implementation "org.hibernate:hibernate-jcache"
+	implementation "org.hibernate:hibernate-entitymanager"
+	implementation "org.hibernate.validator:hibernate-validator"
+	implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+
+	implementation "org.postgresql:postgresql"
+	implementation "org.flywaydb:flyway-core"
 
 
 	implementation "org.zalando:problem-spring-webflux"
 	implementation "org.springframework.cloud:spring-cloud-starter-bootstrap"
-//	implementation "org.springframework.security:spring-security-config"
-//	implementation "org.springframework.security:spring-security-data"
-//	implementation "org.springframework.security:spring-security-web"
 	implementation "io.jsonwebtoken:jjwt-api"
 	runtimeOnly "io.jsonwebtoken:jjwt-impl"
 	runtimeOnly "io.jsonwebtoken:jjwt-jackson"
@@ -221,17 +219,21 @@ dependencies {
 
 	developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
 
+	testImplementation platform("org.testcontainers:testcontainers-bom:1.16.3")
 	testImplementation "org.springframework.boot:spring-boot-test"
 	testImplementation "org.springframework.boot:spring-boot-starter-test"
-//	testImplementation "org.springframework.security:spring-security-test"
 	testImplementation "org.junit.platform:junit-platform-console"
 	testImplementation "io.cucumber:cucumber-junit-platform-engine"
 	testImplementation "io.cucumber:cucumber-java"
 	testImplementation "io.cucumber:cucumber-spring"
+	testImplementation "io.mockk:mockk:1.9.3"
+	testImplementation "com.ninja-squad:springmockk:1.1.3"
 
 	testImplementation "com.h2database:h2"
-	testImplementation "org.testcontainers:testcontainers"
-	testImplementation "org.testcontainers:mongodb"
+	testImplementation "org.testcontainers:postgresql"
+	testImplementation "org.testcontainers:junit-jupiter"
+
+	developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
 }
 
 task cleanResources(type: Delete) {
